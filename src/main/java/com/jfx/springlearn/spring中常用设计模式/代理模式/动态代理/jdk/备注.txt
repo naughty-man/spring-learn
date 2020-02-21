@@ -1,0 +1,40 @@
+关于生成的$Proxy0.class文件解析
+
+首先这个类是final，不能被继承，没有子类，final类中的方法默认是final的
+如果是非final类中的final方法则该方法不能被子类覆盖，但能继承
+
+根据findJob找到该方法调用是m3
+
+//因为这个代理类实现了JobHunter接口所以有下面的方法
+//这个代理类需要调用invoke()，m3作为参数传进去
+    public final void findJob() throws  {
+        try {
+            super.h.invoke(this, m3, (Object[])null);
+        } catch (RuntimeException | Error var2) {
+            throw var2;
+        } catch (Throwable var3) {
+            throw new UndeclaredThrowableException(var3);
+        }
+    }
+
+
+    这个super是Proxy类，因为这个代理类继承了Proxy类，而proxy类持有invocationHandler类型引用h
+
+    public class Proxy implements java.io.Serializable {
+        /**
+         * the invocation handler for this proxy instance.
+         * @serial
+         */
+        protected InvocationHandler h;
+
+    这个h是通过Proxy的静态方法传入的
+
+    //下面方法是JobAgent中介中心的代码
+       public Object getInstance(JobHunter target){
+            this.target=target;
+            Class<? extends JobHunter> aClass = target.getClass();
+            return Proxy.newProxyInstance(aClass.getClassLoader(),aClass.getInterfaces(),this);
+
+        }
+
+    然后就可以顺延出代理类调用了这个中间类的invoke方法，来执行
